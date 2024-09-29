@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Step Form with Progress Bar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color:lightgray ;
+            /* z-index: -1; */
+            transform: translateY(-50%);
+            
+        }
+        .progress-step {
+            text-align: center;
+            width: 100%;
+            position: relative;
+        }
+
+        .progress-step .circle {
+            height: 30px;
+            width: 30px;
+            background-color: lightgray;
+            border-radius: 50%;
+            margin: 0 auto;
+            line-height: 30px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+       
+        .progress-step.active .circle {
+            background-color: #4caf4fab;
+        }
+
+        .progress-step.completed .circle {
+            background-color: #4caf50;
+        }
+
+        /* Form Step Content */
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-navigation button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .form-navigation button[disabled] {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+
+<style>
+  /* Button styling */
+  .buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+  }
+
+  .buttons button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      cursor: pointer;
+  }
+
+  /* Content container styling */
+  .content-container {
+      margin-top: 20px;
+      text-align: center;
+      border: 1px solid #ccc;
+      padding: 20px;
+      display: none; /* Initially hidden */
+  }
+</style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-step active">
+                <div class="circle">1</div>
+            </div>
+            <div class="progress-step">
+                <div class="circle">2</div>
+            </div>
+            <div class="progress-step">
+                <div class="circle">3</div>
+            </div>
+        </div>
+
+        <!-- Multi-Step Form -->
+        <form id="multiStepForm">
+            <!-- Step 1 -->
+            <div class="form-step active">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" placeholder="Enter your name">
+                </div>
+                <div class="form-navigation">
+                    <button type="button" class="next-btn">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="form-step">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                <div class="form-navigation">
+                    <button type="button" class="prev-btn">Previous</button>
+                    <button type="button" class="next-btn">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="form-step">
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="tel" id="phone" placeholder="Enter your phone number">
+                </div>
+                <div class="form-navigation">
+                    <button type="button" class="prev-btn">Previous</button>
+                    <button type="submit" class="submit-btn">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+     <!-- Button section -->
+     <div class="buttons">
+      <button id="btn1" onclick="showContent('content1')">Show Content 1</button>
+      <button id="btn2" onclick="showContent('content2')">Show Content 2</button>
+  </div>
+
+  <!-- Content container -->
+  <div id="content-container" class="content-container">
+      <p id="content"></p>
+  </div>
+
+
+    <script>
+        const steps = Array.from(document.querySelectorAll('.form-step'));
+        const nextBtns = document.querySelectorAll('.next-btn');
+        const prevBtns = document.querySelectorAll('.prev-btn');
+        const progressSteps = Array.from(document.querySelectorAll('.progress-step'));
+        let currentStep = 0;
+
+        nextBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                steps[currentStep].classList.remove('active');
+                currentStep++;
+                steps[currentStep].classList.add('active');
+                updateProgressBar();
+            });
+        });
+
+        prevBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                steps[currentStep].classList.remove('active');
+                currentStep--;
+                steps[currentStep].classList.add('active');
+                updateProgressBar();
+            });
+        });
+
+        function updateProgressBar() {
+            progressSteps.forEach((step, index) => {
+                if (index === currentStep) {
+                    step.classList.add('active');
+                } else if (index < currentStep) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                } else {
+                    step.classList.remove('completed');
+                    step.classList.remove('active');
+                }
+            });
+        }
+
+        // Handle form submission
+        document.getElementById('multiStepForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Form submitted successfully!');
+        });
+    </script>
+ <script>
+  function showContent(contentId) {
+      const contentContainer = document.getElementById('content-container');
+      const content = document.getElementById('content');
+
+      // Check which content to display
+      if (contentId === 'content1') {
+          content.innerHTML = 'This is the content for Button 1.';
+      } else if (contentId === 'content2') {
+          content.innerHTML = 'This is the content for Button 2.';
+      }
+
+      // Display the content container
+      contentContainer.style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
